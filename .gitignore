@@ -1,0 +1,26 @@
+# VMware virtual machines
+*.vmdk
+*.vmem
+*.vmss
+*.vmsn
+*.vmx
+*.vmxf
+*.nvram
+*.lck
+
+# Installation media
+*.iso
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Editor / OS metadata
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+.env
