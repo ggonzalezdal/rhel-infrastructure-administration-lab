@@ -1,22 +1,18 @@
 # Lab Architecture
 
 ## Objective
-
 Build a small enterprise-style RHEL environment for practising deployment, administration, security, automation, and troubleshooting.
 
 ## Host Platform
-
 The lab runs on a Windows 11 workstation using VMware Workstation.
 
 ## Initial Topology
-
 ```text
                     Windows 11 Host
                   VMware Workstation
                          |
-                  RHEL Lab Network
+                  VMnet8 — NAT
                   10.30.30.0/24
-                     (planned)
                          |
           +--------------+--------------+
           |              |              |
@@ -24,14 +20,43 @@ The lab runs on a Windows 11 workstation using VMware Workstation.
      10.30.30.10     10.30.30.20    10.30.30.30
 ```
 
+## VMware Network Design
+The RHEL lab uses VMware `VMnet8` as a NAT network. This provides private communication between the RHEL virtual machines and outbound Internet access through the Windows host for Red Hat registration, repositories, package management, and updates.
+
+### Confirmed VMnet8 Configuration
+
+| Setting | Value |
+|---|---|
+| VMware network | VMnet8 |
+| Network type | NAT |
+| IPv4 subnet | 10.30.30.0/24 |
+| Windows host adapter | 10.30.30.1 |
+| NAT gateway | 10.30.30.2 |
+| DHCP | Enabled |
+| DHCP pool | 10.30.30.128–10.30.30.254 |
+| IPv6 | Disabled |
+
+The Windows host adapter `VMware Network Adapter VMnet8` was verified as operational with IPv4 address `10.30.30.1/24`.
+
+Static infrastructure addresses are deliberately kept outside the VMware DHCP pool.
+
+## Addressing Plan
+
+| System | Address | Purpose |
+|---|---|---|
+| Windows host / VMnet8 | 10.30.30.1 | Host-side VMware adapter |
+| VMware NAT gateway | 10.30.30.2 | Outbound NAT gateway |
+| RHEL-ADM01 | 10.30.30.10 | Administration / Ansible |
+| RHEL-SRV01 | 10.30.30.20 | General-purpose managed server |
+| RHEL-SRV02 | 10.30.30.30 | Infrastructure/service server |
+| VMware DHCP pool | 10.30.30.128–254 | Dynamic/test systems |
+
 ## Systems
 
 ### RHEL-ADM01
-
 Primary administration system.
 
 Planned responsibilities:
-
 - SSH administration
 - Administrative tooling
 - Git
@@ -39,7 +64,6 @@ Planned responsibilities:
 - Troubleshooting and management tasks
 
 Initial proposed resources:
-
 - 2 vCPU
 - 4 GB RAM
 - 60 GB virtual disk
@@ -47,11 +71,9 @@ Initial proposed resources:
 - RHEL 10.2 x86_64
 
 ### RHEL-SRV01
-
 General-purpose managed server.
 
 Planned uses include:
-
 - systemd services
 - storage and LVM
 - web services
@@ -63,11 +85,9 @@ Planned uses include:
 - Ansible management
 
 ### RHEL-SRV02
-
 Infrastructure and service server.
 
 Planned uses include:
-
 - NFS
 - additional storage
 - multi-host administration
@@ -78,33 +98,16 @@ Planned uses include:
 ## Naming Convention
 
 VM display names:
-
 - RHEL-ADM01
 - RHEL-SRV01
 - RHEL-SRV02
 
 Linux hostnames:
-
 - rhel-adm01.lab.internal
 - rhel-srv01.lab.internal
 - rhel-srv02.lab.internal
 
-## Addressing Plan
-
-Planned network:
-
-`10.30.30.0/24`
-
-Initial static addresses:
-
-- RHEL-ADM01 — `10.30.30.10`
-- RHEL-SRV01 — `10.30.30.20`
-- RHEL-SRV02 — `10.30.30.30`
-
-The final VMware network, gateway, DNS, DHCP policy, and NAT configuration will be documented after the VMware virtual network design is completed.
-
 ## Design Principle
-
 New virtual machines and services are introduced only when there is an administrative reason for them.
 
 The lab prioritizes operating systems as infrastructure: configuration must be verified, failures investigated, changes documented, and repetitive administration automated where appropriate.
