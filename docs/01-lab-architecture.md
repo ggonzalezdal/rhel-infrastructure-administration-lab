@@ -1,17 +1,21 @@
 # Lab Architecture
 
 ## Objective
-Build a small enterprise-style RHEL environment for practising deployment, administration, security, automation, and troubleshooting.
+
+Build a small enterprise-style RHEL environment for practising
+deployment, administration, security, automation, and troubleshooting.
 
 ## Host Platform
+
 The lab runs on a Windows 11 workstation using VMware Workstation.
 
 ## Initial Topology
-```text
+
+``` text
                     Windows 11 Host
                   VMware Workstation
                          |
-                  VMnet8 — NAT
+                   VMnet8 — NAT
                   10.30.30.0/24
                          |
           +--------------+--------------+
@@ -20,94 +24,122 @@ The lab runs on a Windows 11 workstation using VMware Workstation.
      10.30.30.10     10.30.30.20    10.30.30.30
 ```
 
+`RHEL-ADM01` is currently deployed. `RHEL-SRV01` and `RHEL-SRV02` will
+be introduced when required by administrative scenarios.
+
 ## VMware Network Design
-The RHEL lab uses VMware `VMnet8` as a NAT network. This provides private communication between the RHEL virtual machines and outbound Internet access through the Windows host for Red Hat registration, repositories, package management, and updates.
+
+The RHEL lab uses VMware `VMnet8` as a NAT network. This provides
+private communication between the RHEL virtual machines and outbound
+Internet access through the Windows host for Red Hat services,
+repositories, package management, and updates.
 
 ### Confirmed VMnet8 Configuration
 
-| Setting | Value |
-|---|---|
-| VMware network | VMnet8 |
-| Network type | NAT |
-| IPv4 subnet | 10.30.30.0/24 |
-| Windows host adapter | 10.30.30.1 |
-| NAT gateway | 10.30.30.2 |
-| DHCP | Enabled |
-| DHCP pool | 10.30.30.128–10.30.30.254 |
-| IPv6 | Disabled |
+  Setting                Value
+  ---------------------- ----------------------------
+  VMware network         VMnet8
+  Network type           NAT
+  IPv4 subnet            10.30.30.0/24
+  Windows host adapter   10.30.30.1
+  NAT gateway            10.30.30.2
+  DHCP                   Enabled
+  DHCP pool              10.30.30.128--10.30.30.254
+  IPv6                   Disabled
 
-The Windows host adapter `VMware Network Adapter VMnet8` was verified as operational with IPv4 address `10.30.30.1/24`.
+The Windows host adapter `VMware Network Adapter VMnet8` was verified as
+operational with IPv4 address `10.30.30.1/24`.
 
-Static infrastructure addresses are deliberately kept outside the VMware DHCP pool.
+Static infrastructure addresses are deliberately kept outside the VMware
+DHCP pool. During the foundation phase, `RHEL-ADM01` uses DHCP and
+received `10.30.30.128/24`. Its planned static infrastructure address
+remains `10.30.30.10`.
 
 ## Addressing Plan
 
-| System | Address | Purpose |
-|---|---|---|
-| Windows host / VMnet8 | 10.30.30.1 | Host-side VMware adapter |
-| VMware NAT gateway | 10.30.30.2 | Outbound NAT gateway |
-| RHEL-ADM01 | 10.30.30.10 | Administration / Ansible |
-| RHEL-SRV01 | 10.30.30.20 | General-purpose managed server |
-| RHEL-SRV02 | 10.30.30.30 | Infrastructure/service server |
-| VMware DHCP pool | 10.30.30.128–254 | Dynamic/test systems |
+  System                  Address             Purpose
+  ----------------------- ------------------- --------------------------------
+  Windows host / VMnet8   10.30.30.1          Host-side VMware adapter
+  VMware NAT gateway      10.30.30.2          Outbound NAT gateway
+  RHEL-ADM01              10.30.30.10         Administration / Ansible
+  RHEL-SRV01              10.30.30.20         General-purpose managed server
+  RHEL-SRV02              10.30.30.30         Infrastructure/service server
+  VMware DHCP pool        10.30.30.128--254   Dynamic/test systems
 
 ## Systems
 
 ### RHEL-ADM01
-Primary administration system.
 
-Planned responsibilities:
-- SSH administration
-- Administrative tooling
-- Git
-- Ansible control node
-- Troubleshooting and management tasks
+Primary administration system and future Ansible control node.
 
-Initial proposed resources:
-- 2 vCPU
-- 4 GB RAM
-- 60 GB virtual disk
-- UEFI firmware
-- RHEL 10.2 x86_64
+Deployed resources:
+
+-   2 vCPU
+-   4 GB RAM
+-   60 GB NVMe virtual disk
+-   VMware NAT networking
+-   RHEL 10.2 x86_64
+
+Responsibilities:
+
+-   SSH administration
+-   Administrative tooling
+-   Git
+-   Ansible control node
+-   Troubleshooting and management tasks
 
 ### RHEL-SRV01
+
 General-purpose managed server.
 
 Planned uses include:
-- systemd services
-- storage and LVM
-- web services
-- SELinux
-- firewalld
-- logging
-- scheduled tasks
-- Podman
-- Ansible management
+
+-   systemd services
+-   storage and LVM
+-   web services
+-   SELinux
+-   firewalld
+-   logging
+-   scheduled tasks
+-   Podman
+-   Ansible management
 
 ### RHEL-SRV02
+
 Infrastructure and service server.
 
 Planned uses include:
-- NFS
-- additional storage
-- multi-host administration
-- backup and recovery exercises
-- patch management
-- service-to-service networking
+
+-   NFS
+-   additional storage
+-   multi-host administration
+-   backup and recovery exercises
+-   patch management
+-   service-to-service networking
 
 ## Naming Convention
 
 VM display names:
-- RHEL-ADM01
-- RHEL-SRV01
-- RHEL-SRV02
 
-Linux hostnames:
-- rhel-adm01.lab.internal
-- rhel-srv01.lab.internal
-- rhel-srv02.lab.internal
+-   RHEL-ADM01
+-   RHEL-SRV01
+-   RHEL-SRV02
+
+Target Linux hostnames:
+
+-   rhel-adm01.lab.internal
+-   rhel-srv01.lab.internal
+-   rhel-srv02.lab.internal
+
+`RHEL-ADM01` currently uses the hostname `rhel-adm01`. The target FQDN
+convention will be implemented when the lab's persistent network and
+name-resolution configuration is introduced.
 
 ## Design Principle
-New virtual machines and services are introduced only when there is an administrative reason for them.
 
-The lab prioritizes operating systems as infrastructure: configuration must be verified, failures investigated, changes documented, and repetitive administration automated where appropriate.
+New virtual machines and services are introduced only when there is an
+administrative reason for them.
+
+The lab prioritizes operating systems as infrastructure: configuration
+must be verified, failures investigated, changes documented, and
+repetitive administration automated where appropriate.
